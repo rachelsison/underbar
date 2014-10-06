@@ -170,6 +170,13 @@ var _ = {};
   //     return total + number;
   //   }, 0); // should be 6
   _.reduce = function(collection, iterator, accumulator) {
+         accumulator = typeof accumulator === 'undefined' ? collection[0]:accumulator;
+          for(var i=0; i < collection.length; i++){
+              accumulator = iterator(accumulator, collection[i]);
+          };
+      
+      return accumulator;
+          
   };
 
   // Determine if the array or object contains a given value (using `===`).
@@ -188,12 +195,29 @@ var _ = {};
   // Determine whether all of the elements match a truth test.
   _.every = function(collection, iterator) {
     // TIP: Try re-using reduce() here.
+    if(collection === null){
+        return true;
+    }
+    var result = true;
+    for(var i=0; i < collection.length; i++){
+        result = result && iterator(collection[i]);
+    };
+    return Boolean(result);
   };
 
   // Determine whether any of the elements pass a truth test. If no iterator is
   // provided, provide a default one
   _.some = function(collection, iterator) {
     // TIP: There's a very clever way to re-use every() here.
+    if(collection === null){
+        return false;
+    };
+    for(var i=0; i < collection.length; i++){
+        if(iterator(collection[i])){
+            return true;
+        }
+        };
+        return false;
   };
 
 
@@ -216,11 +240,27 @@ var _ = {};
   //     bla: "even more stuff"
   //   }); // obj1 now contains key1, key2, key3 and bla
   _.extend = function(obj) {
+      var result = arguments[0];
+      for(var i=1; i < arguments.length; i++){
+          for(var key in arguments[i]){
+              result[key] = arguments[i][key];
+          }
+      }
+      return result;
   };
 
   // Like extend, but doesn't ever overwrite a key that already
   // exists in obj
   _.defaults = function(obj) {
+      var result = arguments[0];
+      for(var i=1; i < arguments.length; i++){
+          for(var key in arguments[i]){
+              if(result[key] === undefined){
+                  result[key] = arguments[i][key];
+              }
+          }
+      }
+      return result;
   };
 
 
@@ -262,6 +302,19 @@ var _ = {};
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
+      var result;
+      var memos = {};
+
+      return function() {
+          if(memos[func.toString] === undefined) {
+              result = func.apply(this, arguments);
+              alreadyCalled = true;
+              memos[func.toString] = result;
+          }else{
+              return memos[func.toString];
+          }
+      }
+
   };
 
   // Delays a function for the given number of milliseconds, and then calls
