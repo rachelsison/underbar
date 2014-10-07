@@ -302,18 +302,16 @@ var _ = {};
   // already computed the result for the given argument and return that value
   // instead if possible.
   _.memoize = function(func) {
-      var result;
-      var memos = {};
+      var memoize = function(key){
+        var cache = memoize.cache;
+        if (cache[key] === undefined) {
+            cache[key] = func.apply(this, arguments);
+        }
+            return cache[key];
+      };
 
-      return function() {
-          if(memos[func.toString] === undefined) {
-              result = func.apply(this, arguments);
-              alreadyCalled = true;
-              memos[func.toString] = result;
-          }else{
-              return memos[func.toString];
-          }
-      }
+      memoize.cache = {};
+      return memoize;
 
   };
 
@@ -324,6 +322,9 @@ var _ = {};
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
+    return setTimeout(function(){
+      return func.apply(null, slice.call(arguments, 2));
+    }, wait);
   };
 
 
