@@ -170,12 +170,23 @@ var _ = {};
   //     return total + number;
   //   }, 0); // should be 6
   _.reduce = function(collection, iterator, accumulator) {
-         accumulator = typeof accumulator === 'undefined' ? collection[0]:accumulator;
+      if(collection.constructor === Array){  
+      accumulator = typeof accumulator === 'undefined' ? collection[0]:accumulator;
           for(var i=0; i < collection.length; i++){
               accumulator = iterator(accumulator, collection[i]);
           };
       
       return accumulator;
+      }
+      if(collection.constructor === Object){
+          accumulator = typeof accumulator === 'undefined' ? collection[Object.keys(collection)[0]]:accumulator;
+          for(var key in collection){
+              if(key !== accumulator){
+                  accumulator = iterator(accumulator, collection[key]);
+              }
+          }
+          return accumulator;
+      }
           
   };
 
@@ -200,7 +211,11 @@ var _ = {};
     }
     var result = true;
     for(var i=0; i < collection.length; i++){
-        result = result && iterator(collection[i]);
+        if(iterator === undefined){
+            result = result && collection[i];
+        }else{
+            result = result && iterator(collection[i]);
+        }
     };
     return Boolean(result);
   };
@@ -212,6 +227,13 @@ var _ = {};
     if(collection === null){
         return false;
     };
+    if(iterator === undefined){
+        for(var i=0; i < collection.length; i++){
+            if(!!(collection[i])){
+                return true;
+            }
+        }return false;
+    }
     for(var i=0; i < collection.length; i++){
         if(iterator(collection[i])){
             return true;
@@ -322,8 +344,9 @@ var _ = {};
   // parameter. For example _.delay(someFunction, 500, 'a', 'b') will
   // call someFunction('a', 'b') after 500ms
   _.delay = function(func, wait) {
-    return setTimeout(function(){
-      return func.apply(null, slice.call(arguments, 2));
+    var args = Array.prototype.slice.call(arguments, 2);
+      return setTimeout(function(){
+      return func.apply(null, args);
     }, wait);
   };
 
@@ -339,6 +362,16 @@ var _ = {};
   // input array. For a tip on how to make a copy of an array, see:
   // http://mdn.io/Array.prototype.slice
   _.shuffle = function(array) {
+      var arrayCopy = array.slice(0)
+      var shuffledArray = [];  
+      while(arrayCopy.length > 0){
+            var max = arrayCopy.length - 1;
+            var min = 0;
+            var index= Math.floor(Math.random() * (max - min + 1));
+            shuffledArray.push(arrayCopy.splice(index, 1)[0]);
+      };
+            
+      return shuffledArray;
   };
 
 
